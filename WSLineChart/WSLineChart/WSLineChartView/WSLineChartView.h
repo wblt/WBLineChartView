@@ -11,7 +11,7 @@
 @interface WSLineChartView : UIView
 
 
-- (id)initWithFrame:(CGRect)frame xTitleArray:(NSArray*)xTitleArray yValueArray:(NSArray*)yValueArray yMax:(CGFloat)yMax yMin:(CGFloat)yMin;
+- (id)initWithFrame:(CGRect)frame xTitleArray:(NSArray*)xTitleArray yValueArray:(NSArray*)yValueArray yValueArray2:(NSArray*)yValueArray2 yMax:(CGFloat)yMax yMin:(CGFloat)yMin;
 
 
 @end

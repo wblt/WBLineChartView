@@ -18,7 +18,7 @@
 @property (assign, nonatomic) CGPoint currentLoc; //长按时当前定位位置
 @property (assign, nonatomic) CGPoint screenLoc; //相对于屏幕位置
 
-- (id)initWithFrame:(CGRect)frame xTitleArray:(NSArray*)xTitleArray yValueArray:(NSArray*)yValueArray yMax:(CGFloat)yMax yMin:(CGFloat)yMin;
+- (id)initWithFrame:(CGRect)frame xTitleArray:(NSArray*)xTitleArray yValueArray:(NSArray*)yValueArray yValueArray2:(NSArray *)yValueArray2 yMax:(CGFloat)yMax yMin:(CGFloat)yMin;
 
 
 @end

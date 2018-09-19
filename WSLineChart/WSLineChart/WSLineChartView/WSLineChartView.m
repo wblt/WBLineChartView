@@ -19,6 +19,7 @@
 
 @property (strong, nonatomic) NSArray *xTitleArray;
 @property (strong, nonatomic) NSArray *yValueArray;
+@property (strong, nonatomic) NSArray *yValueArray2;
 @property (assign, nonatomic) CGFloat yMax;
 @property (assign, nonatomic) CGFloat yMin;
 @property (strong, nonatomic) YAxisView *yAxisView;
@@ -35,7 +36,7 @@
 
 @implementation WSLineChartView
 
-- (id)initWithFrame:(CGRect)frame xTitleArray:(NSArray*)xTitleArray yValueArray:(NSArray*)yValueArray yMax:(CGFloat)yMax yMin:(CGFloat)yMin {
+- (id)initWithFrame:(CGRect)frame xTitleArray:(NSArray*)xTitleArray yValueArray:(NSArray*)yValueArray yValueArray2:(NSArray*)yValueArray2 yMax:(CGFloat)yMax yMin:(CGFloat)yMin {
     
     self = [super initWithFrame:frame];
     if (self) {
@@ -43,6 +44,7 @@
         
         self.xTitleArray = xTitleArray;
         self.yValueArray = yValueArray;
+        self.yValueArray2 = yValueArray2;
         self.yMax = yMax;
         self.yMin = yMin;
         
@@ -68,9 +70,6 @@
         
         [self creatXAxisView];
     
-//        // 2. 捏合手势
-//        UIPinchGestureRecognizer *pinch = [[UIPinchGestureRecognizer alloc] initWithTarget:self action:@selector(pinchGesture:)];
-//        [self.xAxisView addGestureRecognizer:pinch];
         //长按手势
         UILongPressGestureRecognizer *longPress = [[UILongPressGestureRecognizer alloc]initWithTarget:self action:@selector(event_longPressAction:)];
         [self.xAxisView addGestureRecognizer:longPress];
@@ -94,7 +93,7 @@
     _scrollView.bounces = NO;
     [self addSubview:_scrollView];
     
-    self.xAxisView = [[XAxisView alloc] initWithFrame:CGRectMake(0, 0, self.xTitleArray.count * self.pointGap + lastSpace, self.frame.size.height) xTitleArray:self.xTitleArray yValueArray:self.yValueArray yMax:self.yMax yMin:self.yMin];
+    self.xAxisView = [[XAxisView alloc] initWithFrame:CGRectMake(0, 0, self.xTitleArray.count * self.pointGap + lastSpace, self.frame.size.height) xTitleArray:self.xTitleArray yValueArray:self.yValueArray yValueArray2:self.yValueArray2  yMax:self.yMax yMin:self.yMin];
     
     [_scrollView addSubview:self.xAxisView];
     

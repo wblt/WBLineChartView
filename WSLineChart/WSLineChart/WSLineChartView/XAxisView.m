@@ -22,6 +22,7 @@
 @property (strong, nonatomic) NSArray *yValueArray;
 @property (assign, nonatomic) CGFloat yMax;
 @property (assign, nonatomic) CGFloat yMin;
+@property (strong, nonatomic) NSArray *yValueArray2;
 
 @property (assign, nonatomic) CGFloat defaultSpace;
 
@@ -35,13 +36,13 @@
 
 @implementation XAxisView
 
-- (id)initWithFrame:(CGRect)frame xTitleArray:(NSArray*)xTitleArray yValueArray:(NSArray*)yValueArray yMax:(CGFloat)yMax yMin:(CGFloat)yMin {
-    
+- (id)initWithFrame:(CGRect)frame xTitleArray:(NSArray*)xTitleArray yValueArray:(NSArray*)yValueArray yValueArray2:(NSArray *)yValueArray2 yMax:(CGFloat)yMax yMin:(CGFloat)yMin {
     self = [super initWithFrame:frame];
     if (self) {
         self.backgroundColor = [UIColor colorWithRed:85.0f/255.0f green:85.0f/255.0f blue:85.0f/255.0f alpha:1.0f];
         self.xTitleArray = xTitleArray;
         self.yValueArray = yValueArray;
+        self.yValueArray2 = yValueArray2;
         self.yMax = yMax;
         self.yMin = yMin;
         
@@ -117,9 +118,7 @@
         if (i != 0) {
             if ((maxX + 3) > titleRect.origin.x) {
                 //不绘制
-                
             }else{
-                
                 [title drawInRect:titleRect withAttributes:@{NSFontAttributeName :[UIFont systemFontOfSize:8],NSForegroundColorAttributeName:kChartTextColor}];
                 //画垂直X轴的竖线
                 [self drawLine:context
@@ -161,24 +160,21 @@
              lineWidth:.1];
         
     }
+    
     /////////////////////// 根据数据源画折线 /////////////////////////
     if (self.yValueArray && self.yValueArray.count > 0) {
-        
         //画折线
         for (NSInteger i = 0; i < self.yValueArray.count; i++) {
-            
             //如果是最后一个点
             if (i == self.yValueArray.count-1) {
                 NSNumber *endValue = self.yValueArray[i];
                 CGFloat chartHeight = self.frame.size.height - textSize.height - 5 - topMargin;
                 CGPoint endPoint = CGPointMake((i+1)*self.pointGap, chartHeight -  (endValue.floatValue-self.yMin)/(self.yMax-self.yMin) * chartHeight+topMargin);
-                
                 //画最后一个点
                 UIColor*aColor = [UIColor lightGrayColor]; //点的颜色
                 CGContextSetFillColorWithColor(context, aColor.CGColor);//填充颜色
                 CGContextAddArc(context, endPoint.x, endPoint.y, 1, 0, 2*M_PI, 0); //添加一个圆
                 CGContextDrawPath(context, kCGPathFill);//绘制填充
-                
                 //画点上的文字
                 NSString *str = [NSString stringWithFormat:@"%.2f", endValue.floatValue];
                 // 判断是不是小数
@@ -188,47 +184,35 @@
                 else {
                     str = [NSString stringWithFormat:@"%.0f", endValue.floatValue];
                 }
-                
                 NSDictionary *attr = @{NSFontAttributeName : [UIFont systemFontOfSize:8]};
                 CGSize strSize = [str sizeWithAttributes:attr];
                 
                 CGRect strRect = CGRectMake(endPoint.x-strSize.width/2,endPoint.y-strSize.height,strSize.width,strSize.height);
-                
                 // 如果点的文字有重叠，那么不绘制
                 CGFloat maxX = CGRectGetMaxX(self.firstStrFrame);
                 if (i != 0) {
                     if ((maxX + 3) > strRect.origin.x) {
                         //不绘制
-                        
                     }else{
-                        
                         [str drawInRect:strRect withAttributes:@{NSFontAttributeName :[UIFont systemFontOfSize:8],NSForegroundColorAttributeName:kChartTextColor}];
-                        
                         self.firstStrFrame = strRect;
                     }
                 }else {
                     if (self.firstStrFrame.origin.x < 0) {
-                        
                         CGRect frame = self.firstStrFrame;
                         frame.origin.x = 0;
                         self.firstStrFrame = frame;
                     }
                 }
-                
             }else {
-                
                 NSNumber *startValue = self.yValueArray[i];
                 NSNumber *endValue = self.yValueArray[i+1];
                 CGFloat chartHeight = self.frame.size.height - textSize.height - 5 - topMargin;
-                
                 CGPoint startPoint = CGPointMake((i+1)*self.pointGap, chartHeight -  (startValue.floatValue-self.yMin)/(self.yMax-self.yMin) * chartHeight+topMargin);
                 CGPoint endPoint = CGPointMake((i+2)*self.pointGap, chartHeight -  (endValue.floatValue-self.yMin)/(self.yMax-self.yMin) * chartHeight+topMargin);
-                
                 CGFloat normal[1]={1};
                 CGContextSetLineDash(context,0,normal,0); //画实线
-                
                 [self drawLine:context startPoint:startPoint endPoint:endPoint lineColor:[UIColor colorWithRed:82/255.0 green:190/255.0 blue:91/255.0 alpha:1] lineWidth:2];
-                
                 //画点
                 UIColor*aColor = [UIColor redColor]; //点的颜色
                 CGContextSetFillColorWithColor(context, aColor.CGColor);//填充颜色
@@ -259,20 +243,15 @@
                     }
                     // 如果点的文字有重叠，那么不绘制
                     CGFloat maxX = CGRectGetMaxX(self.firstStrFrame);
-                    //            NSLog(@"%f   %f",maxX,strRect.origin.x);
                     if (i != 0) {
                         if ((maxX + 3) > strRect.origin.x) {
                             //不绘制
-                            
                         }else{
-                            
                             [str drawInRect:strRect withAttributes:@{NSFontAttributeName :[UIFont systemFontOfSize:8],NSForegroundColorAttributeName:kChartTextColor}];
-                            
                             self.firstStrFrame = strRect;
                         }
                     }else {
                         if (self.firstStrFrame.origin.x < 0) {
-                            
                             CGRect frame = self.firstStrFrame;
                             frame.origin.x = 0;
                             self.firstStrFrame = frame;
@@ -280,13 +259,111 @@
                     }
                 }
             }
-            
-            
         }
     }
     
+    /////////////////////// 根据数据源画折线2 /////////////////////////
+    if (self.yValueArray2 && self.yValueArray2.count > 0) {
+        //画折线
+        for (NSInteger i = 0; i < self.yValueArray2.count; i++) {
+            //如果是最后一个点
+            if (i == self.yValueArray.count-1) {
+                NSNumber *endValue = self.yValueArray2[i];
+                CGFloat chartHeight = self.frame.size.height - textSize.height - 5 - topMargin;
+                CGPoint endPoint = CGPointMake((i+1)*self.pointGap, chartHeight -  (endValue.floatValue-self.yMin)/(self.yMax-self.yMin) * chartHeight+topMargin);
+                //画最后一个点
+                UIColor*aColor = [UIColor lightGrayColor]; //点的颜色
+                CGContextSetFillColorWithColor(context, aColor.CGColor);//填充颜色
+                CGContextAddArc(context, endPoint.x, endPoint.y, 1, 0, 2*M_PI, 0); //添加一个圆
+                CGContextDrawPath(context, kCGPathFill);//绘制填充
+                //画点上的文字
+                NSString *str = [NSString stringWithFormat:@"%.2f", endValue.floatValue];
+                // 判断是不是小数
+                if ([self isPureFloat:endValue.floatValue]) {
+                    str = [NSString stringWithFormat:@"%.2f", endValue.floatValue];
+                }
+                else {
+                    str = [NSString stringWithFormat:@"%.0f", endValue.floatValue];
+                }
+                NSDictionary *attr = @{NSFontAttributeName : [UIFont systemFontOfSize:8]};
+                CGSize strSize = [str sizeWithAttributes:attr];
+                
+                CGRect strRect = CGRectMake(endPoint.x-strSize.width/2,endPoint.y-strSize.height,strSize.width,strSize.height);
+                // 如果点的文字有重叠，那么不绘制
+                CGFloat maxX = CGRectGetMaxX(self.firstStrFrame);
+                if (i != 0) {
+                    if ((maxX + 3) > strRect.origin.x) {
+                        //不绘制
+                    }else{
+                        [str drawInRect:strRect withAttributes:@{NSFontAttributeName :[UIFont systemFontOfSize:8],NSForegroundColorAttributeName:kChartTextColor}];
+                        self.firstStrFrame = strRect;
+                    }
+                }else {
+                    if (self.firstStrFrame.origin.x < 0) {
+                        CGRect frame = self.firstStrFrame;
+                        frame.origin.x = 0;
+                        self.firstStrFrame = frame;
+                    }
+                }
+            }else {
+                NSNumber *startValue = self.yValueArray2[i];
+                NSNumber *endValue = self.yValueArray2[i+1];
+                CGFloat chartHeight = self.frame.size.height - textSize.height - 5 - topMargin;
+                CGPoint startPoint = CGPointMake((i+1)*self.pointGap, chartHeight -  (startValue.floatValue-self.yMin)/(self.yMax-self.yMin) * chartHeight+topMargin);
+                CGPoint endPoint = CGPointMake((i+2)*self.pointGap, chartHeight -  (endValue.floatValue-self.yMin)/(self.yMax-self.yMin) * chartHeight+topMargin);
+                CGFloat normal[1]={1};
+                CGContextSetLineDash(context,0,normal,0); //画实线
+                [self drawLine:context startPoint:startPoint endPoint:endPoint lineColor:[UIColor colorWithRed:82/255.0 green:190/255.0 blue:91/255.0 alpha:1] lineWidth:2];
+                //画点
+                UIColor*aColor = [UIColor redColor]; //点的颜色
+                CGContextSetFillColorWithColor(context, aColor.CGColor);//填充颜色
+                CGContextAddArc(context, startPoint.x, startPoint.y, 2, 0, 2*M_PI, 0); //添加一个圆
+                CGContextDrawPath(context, kCGPathFill);//绘制填充
+                if (!_isShowLabel) {
+                    //画点上的文字
+                    NSString *str = [NSString stringWithFormat:@"%.2f", endValue.floatValue];
+                    // 判断是不是小数
+                    if ([self isPureFloat:startValue.floatValue]) {
+                        str = [NSString stringWithFormat:@"%.2f", startValue.floatValue];
+                    }
+                    else {
+                        str = [NSString stringWithFormat:@"%.0f", startValue.floatValue];
+                    }
+                    
+                    NSDictionary *attr = @{NSFontAttributeName : [UIFont systemFontOfSize:8]};
+                    CGSize strSize = [str sizeWithAttributes:attr];
+                    
+                    CGRect strRect = CGRectMake(startPoint.x-strSize.width/2,startPoint.y-strSize.height,strSize.width,strSize.height);
+                    if (i == 0) {
+                        self.firstStrFrame = strRect;
+                        if (strRect.origin.x < 0) {
+                            strRect.origin.x = 0;
+                        }
+                        
+                        [str drawInRect:strRect withAttributes:@{NSFontAttributeName :[UIFont systemFontOfSize:8],NSForegroundColorAttributeName:kChartTextColor}];
+                    }
+                    // 如果点的文字有重叠，那么不绘制
+                    CGFloat maxX = CGRectGetMaxX(self.firstStrFrame);
+                    if (i != 0) {
+                        if ((maxX + 3) > strRect.origin.x) {
+                            //不绘制
+                        }else{
+                            [str drawInRect:strRect withAttributes:@{NSFontAttributeName :[UIFont systemFontOfSize:8],NSForegroundColorAttributeName:kChartTextColor}];
+                            self.firstStrFrame = strRect;
+                        }
+                    }else {
+                        if (self.firstStrFrame.origin.x < 0) {
+                            CGRect frame = self.firstStrFrame;
+                            frame.origin.x = 0;
+                            self.firstStrFrame = frame;
+                        }
+                    }
+                }
+            }
+        }
+    }
     
-    //长按时进入
+    //////////////////////////长按时进入/////////////////////////////
     if(self.isLongPress)
     {
         NSLog(@"%f",_currentLoc.x/self.pointGap);
@@ -297,15 +374,8 @@
             CGFloat chartHeight = self.frame.size.height - textSize.height - 5 - topMargin;
             
             CGPoint selectPoint = CGPointMake((nowPoint+1)*self.pointGap, chartHeight -  (num.floatValue-self.yMin)/(self.yMax-self.yMin) * chartHeight+topMargin);
-            
-            //            NSLog(@"_screenLoc=%@",NSStringFromCGPoint(_screenLoc));
-            //            NSLog(@"_currentLoc=%@",NSStringFromCGPoint(_currentLoc));
-            
-            // 显示的时间和水位
-            //            CGContextSetFillColorWithColor(context, [UIColor greenColor].CGColor);
-            //            CGContextSetStrokeColorWithColor(context, [UIColor greenColor].CGColor);
             CGContextSaveGState(context);
-            //            NSString *timeStr = ;
+            
             NSDictionary *timeAttr = @{NSFontAttributeName : [UIFont systemFontOfSize:12]};
             CGSize timeSize = [[NSString stringWithFormat:@"时间:%@",self.xTitleArray[nowPoint]] sizeWithAttributes:timeAttr];
             //画文字所在的位置  动态变化
@@ -335,8 +405,7 @@
                 //如果按住的位置在屏幕靠左边   那么字就显示在按住位置的右上角40 60位置
                 drawPoint = CGPointMake(_currentLoc.x+40, _currentLoc.y-60);
             }
-            
-            
+        
             //画选中的数值
             [[NSString stringWithFormat:@"时间:%@",self.xTitleArray[nowPoint]] drawAtPoint:CGPointMake(drawPoint.x, drawPoint.y) withAttributes:@{NSFontAttributeName:[UIFont systemFontOfSize:12],NSForegroundColorAttributeName:[UIColor whiteColor]}];
             
@@ -349,23 +418,22 @@
                 [[NSString stringWithFormat:@"水位:%.0fm", [num floatValue]] drawAtPoint:CGPointMake(drawPoint.x, drawPoint.y+15)withAttributes:@{NSFontAttributeName:[UIFont systemFontOfSize:12],NSForegroundColorAttributeName:[UIColor whiteColor]}];
                 
             }
-            
-            
+        
             //画十字线
-                        CGContextRestoreGState(context);
-                        CGContextSetLineWidth(context, 1);
-                        CGContextSetFillColorWithColor(context, [UIColor lightGrayColor].CGColor);
-                        CGContextSetStrokeColorWithColor(context, [UIColor lightGrayColor].CGColor);
+            CGContextRestoreGState(context);
+            CGContextSetLineWidth(context, 1);
+            CGContextSetFillColorWithColor(context, [UIColor lightGrayColor].CGColor);
+            CGContextSetStrokeColorWithColor(context, [UIColor lightGrayColor].CGColor);
 
-                        // 选中横线
-                        CGContextMoveToPoint(context, 0, selectPoint.y);
-                        CGContextAddLineToPoint(context, self.frame.size.width, selectPoint.y);
+            // 选中横线
+            CGContextMoveToPoint(context, 0, selectPoint.y);
+            CGContextAddLineToPoint(context, self.frame.size.width, selectPoint.y);
 
-                        // 选中竖线
-                        CGContextMoveToPoint(context, selectPoint.x, 0);
-                        CGContextAddLineToPoint(context, selectPoint.x, self.frame.size.height- textSize.height - 5);
+            // 选中竖线
+            CGContextMoveToPoint(context, selectPoint.x, 0);
+            CGContextAddLineToPoint(context, selectPoint.x, self.frame.size.height- textSize.height - 5);
 
-                        CGContextStrokePath(context);
+            CGContextStrokePath(context);
             
             [self drawLine:context startPoint:CGPointMake(selectPoint.x, 0) endPoint:CGPointMake(selectPoint.x, self.frame.size.height- textSize.height - 5) lineColor:[UIColor redColor] lineWidth:1];
             
